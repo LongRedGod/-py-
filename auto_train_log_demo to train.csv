@@ -1,0 +1,33 @@
+# -py-
+python代码  #将json文件解析并输出到csv文件中
+import pandas as pd
+import json
+import re 
+
+def log_to_csv(path=r"e:\Desktop\auto_train_log_demo.log",  sort_by=['f1_a_test_zero','f1_a_test_one']):
+    logdf=pd.DataFrame()
+    with open(r"e:\Desktop\auto_train_log_demo.log", 'r') as file:
+        for line in file: 
+            ls = '{' + re.findall(re.compile(r'{(.*)}'),line)[0]+ '}'
+                
+            jsondata=json.loads(ls)
+                        
+            jsondata["dropped_features"]=",".join(jsondata["dropped_features"])
+        
+            jsondf=pd.DataFrame(jsondata,index=[1])
+        
+            jsondf["todate"]=line.split(",")[0]
+            
+            logdf=pd.concat([logdf,jsondf])
+    logdf=logdf[[ 'todate', 'model_name','accuracy_a_test', 'accuracy_b_test', 'accuracy_train',
+             'dropped_features', 'f1_a_test_one', 'f1_a_test_zero', 'f1_b_test_one', 'f1_b_test_zero',
+             'f1_train_one', 'f1_train_zero', 'precision_a_test_one', 'precision_a_test_zero',
+             'precision_b_test_one', 'precision_b_test_zero', 'precision_train_one', 'precision_train_zero',
+             'recall_a_test_one', 'recall_a_test_zero', 'recall_b_test_one', 'recall_b_test_zero',
+             'recall_train_one', 'recall_train_zero', 'train_score']].sort_values(by=sort_by,ascending=[False,False])
+    
+    
+    logdf.to_csv("f:\\train.csv",index = None,encoding = "GB18030")
+    return logdf
+
+logdfs=log_to_csv(path=r"e:\Desktop\auto_train_log_demo.log", sort_by=['f1_a_test_zero','f1_a_test_one'])
